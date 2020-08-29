@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <meta name="viewport" content="width=device-width" />
+
+  <!-- magx client -->
+  <script type="text/javascript" src="/magx"></script>
+
+  <style>
+    body {
+      font-family: Tahoma, Geneva, sans-serif;
+    }
+  </style>
+
+  <style type="text/css">
+    .player {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      padding-top: 24px;
+      box-sizing: border-box;
+      left: 0;
+      top: 0;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <p>This example shows how to use custom data structures in your room's state.</p>
+
+  <strong>commands</strong><br>
+
+  <button onclick="move(0,-1)">up</button>
+  <button onclick="move(0, 1)">down</button>
+  <br />
+  <button onclick="move(-1, 0)">left</button>
+  <button onclick="move(1, 0)">right</button>
+
+  <script>
+    let room = null
+    const players = {}
+    const colors = ['red', 'green', 'yellow', 'blue', 'cyan', 'magenta']
+
+    const move = (x, y) => {
+      room.send("move", { x, y })
+    }
+
+    const create = (id, player) => {
+      var el = document.createElement("div")
+      el.className = "player"
+      el.style.left = player.x + "px"
+      el.style.top = player.y + "px"
+      el.style.background = colors[Math.floor(Math.random() * colors.length)]
+      el.innerText = "Player " + id
+
+      player.el = el
+      players[id] = player
+      document.body.appendChild(el);
+    }
+
+    const remove = (id) => {
+      document.body.removeChild(players[id].el);
+      delete players[id];
+    }
+
+    const draw = (player) => {
+      player.el.style.left = player.x + "px"
+      player.el.style.top = player.y + "px"
+    }
+
+    const { host, port, protocol } = window.document.location
+    var client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:" })
+
+    client.authenticate()
+      .then(() => client.getRooms("state_handler"))
+      .then(rooms => rooms.length ? client.joinRoom(rooms[0].id) : client.createRoom("state_handler"))
+      .then(r => {
+        room = r
+        console.log("joined")
+
+        room.onSnapshot((state) => {
+          console.log("initial room state:", state);
+          Object.keys(state.players).forEach((id) => create(id, state.players[id]))
+        })
+
+        room.onChange("add", "players/:id", ({ value: player }, { id }) => {
+          create(id, player)
+        })
+
+        room.onChange("remove", "players/:id", (patch, { id }) => {
+          remove(id)
+        })
+
+        room.onChange("replace", "players/:id/:prop", ({ value }, { id, prop }) => {
+          const player = players[id];
+          player[prop] = value
+          draw(player)
+        })
+
+        window.addEventListener("keydown", ({ which }) => {
+          switch (which) {
+            case 38: return move(0, -1)
+            case 39: return move(1, 0)
+            case 40: return move(0, 1)
+            case 37: return move(-1, 0)
+          }
+        })
+      })
+      .catch(console.log)
+  </script>
+</body>
+
+</html>

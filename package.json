@@ -1,0 +1,28 @@
+{
+  "name": "sync-server-examples",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.ts",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "serve": "nodemon --watch '**/*.ts' --ignore '**/*.spec.ts' --exec ts-node src/index.ts",
+    "serve-cluster": "nodemon --watch '**/*.ts' --ignore '**/*.spec.ts' --exec ts-node src/cluster.ts"
+  },
+  "keywords": [],
+  "author": "Damir Yusipov",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^11.15.20",
+    "magx": "^0.3.4",
+    "magx-client": "^0.6.2",
+    "mosx": "^0.7.1",
+    "nodemon": "^1.19.4",
+    "ts-node": "^8.10.2",
+    "tslint": "^5.20.1",
+    "typescript": "^3.9.7"
+  },
+  "devDependencies": {}
+}

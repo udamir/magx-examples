@@ -1,0 +1,1 @@
+On this repository you can find basic usage examples of how to use magx, mosx and magx-client.
