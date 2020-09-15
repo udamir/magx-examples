@@ -7,6 +7,7 @@ import {
   MosxChatRoom,
   ChatRoom,
   StateHandlerRoom,
+  OpenWorldRoom,
   ReconnectionRoom,
 } from "./rooms"
 
@@ -21,6 +22,7 @@ export const createServer = (params?: IServerParams<any>) => {
       custom_options: "you can use me on Room#onCreate",
     })
     .define("state_handler", StateHandlerRoom)
+    .define("open_world", OpenWorldRoom)
     .define("reconnection", ReconnectionRoom)
 
   // attach public dir routes
