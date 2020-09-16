@@ -59,12 +59,12 @@ const chatStore = {
     },
     async joinChat({ state, dispatch }) {
 
-      const rooms = await state.client.getRooms("mosxChat")
+      const rooms = await state.client.getRooms("mosx-chat")
 
       console.log("Avaliable rooms:", rooms)
       room = rooms.length 
         ? await state.client.joinRoom(rooms[0].id) 
-        : await state.client.createRoom("mosxChat")
+        : await state.client.createRoom("mosx-chat")
     
       if (room) {
         dispatch("handleRoom", room)

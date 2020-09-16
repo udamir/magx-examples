@@ -6,6 +6,7 @@ import { Server, IServerParams, LobbyRoom, Router } from "magx"
 import {
   MosxChatRoom,
   ChatRoom,
+  RelayRoom,
   StateHandlerRoom,
   OpenWorldRoom,
   ReconnectionRoom,
@@ -16,14 +17,15 @@ export const createServer = (params?: IServerParams<any>) => {
   const server = http.createServer()
 
   const magx = new Server(server, params)
-    .define("mosxChat", MosxChatRoom)
-    .define("lobby", LobbyRoom, { watch: ["mosxChat", "chat", "state_handler", "reconnection"] })
+    .define("mosx-chat", MosxChatRoom)
+    .define("lobby", LobbyRoom, { watch: ["mosx-chat", "chat", "mosx-state", "reconnection", "relay"] })
     .define("chat", ChatRoom, {
       custom_options: "you can use me on Room#onCreate",
     })
-    .define("state_handler", StateHandlerRoom)
-    .define("open_world", OpenWorldRoom)
+    .define("relay", RelayRoom)
     .define("reconnection", ReconnectionRoom)
+    .define("mosx-state", StateHandlerRoom)
+    .define("open-world", OpenWorldRoom)
 
   // attach public dir routes
   magx.router.attach(Router.static(__dirname + "/../public"))

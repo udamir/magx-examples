@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <meta name="viewport" content="width=device-width" />
+
+  <!-- magx client -->
+  <script type="text/javascript" src="/magx"></script>
+
+  <style>
+    body {
+      font-family: Tahoma, Geneva, sans-serif;
+    }
+  </style>
+
+  <style type="text/css">
+    .player {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      padding-top: 24px;
+      box-sizing: border-box;
+      left: 0;
+      top: 0;
+    }
+  </style>
+
+</head>
+
+<body>
+  <p>This example shows how to create relay server without room's state. Use arrows to move</p>
+
+  <script>
+    const { host, port, protocol } = window.document.location
+    var client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:" })
+
+    const name = Math.random().toString(32).slice(3)
+
+    let room = null
+    const players = {}
+    const colors = ['red', 'green', 'yellow', 'blue', 'cyan', 'magenta']
+
+    const move = (shiftX, shiftY) => {
+      const player = players[client.auth.id]
+      
+      const x = player.x + shiftX * 10
+      const y = player.y + shiftY * 10
+
+      room.send("move", { x, y })
+    }
+
+    const createPlayer = (id, player) => {
+      var el = document.createElement("div")
+      el.className = "player"
+      el.style.left = player.x + "px"
+      el.style.top = player.y + "px"
+      el.style.background = player.color
+      el.innerText = "Player " + player.name
+
+      player.el = el
+      players[id] = player
+      document.body.appendChild(el);
+    }
+
+    const remove = (id) => {
+      document.body.removeChild(players[id].el);
+      delete players[id];
+    }
+
+    const draw = (player) => {
+      player.el.style.left = player.x + "px"
+      player.el.style.top = player.y + "px"
+    }
+
+    client.authenticate({ name })
+      .then(() => client.getRooms("relay"))
+      .then(rooms => rooms.length ? client.joinRoom(rooms[0].id) : client.createRoom("relay"))
+      .then(r => {
+        room = r
+        console.log("joined", name)
+        const x = Math.floor(Math.random() * 400)
+        const y = Math.floor(Math.random() * 400)
+        const color = colors[Math.floor(Math.random() * colors.length)]
+        createPlayer(client.auth.id, { name, x, y, color })
+        room.send("hello", { name, x, y, color })
+
+        // listen to patches coming from the server
+        room.onMessage("move", ({ id, data }) => {
+          players[id].x = data.x
+          players[id].y = data.y
+          draw(players[id])
+        })
+
+        room.onMessage("join", ({ id, data }) => {
+          const { el, ...rest } = players[client.auth.id]
+          room.send("hello", { ...rest })
+        })
+
+        room.onMessage("hello", ({ id, data }) => {
+          if (!players[id]) {
+            createPlayer(id, data)
+          }
+        })
+
+        room.onMessage("leave", ({ id }) => {
+          remove(id)
+        })
+
+        window.addEventListener("keydown", ({ which }) => {
+          switch (which) {
+            case 38: return move(0, -1)
+            case 39: return move(1, 0)
+            case 40: return move(0, 1)
+            case 37: return move(-1, 0)
+          }
+        })
+      })
+      .catch(console.log)
+  </script>
+</body>
+
+</html>

@@ -1,6 +1,7 @@
-export * from "./basic/01-chat-room"
-export * from "./basic/02-state-handler"
-export * from "./basic/04-reconnection"
-export * from "./openWorld"
+export * from "./basic/chat"
+export * from "./basic/mosx-state"
+export * from "./basic/reconnection"
+export * from "./basic/relay"
 
-export * from "./mosxChat"
+export * from "./advanced/mosx-open-world"
+export * from "./advanced/mosx-chat"

@@ -76,8 +76,8 @@
     var client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:" })
 
     client.authenticate()
-      .then(() => client.getRooms("state_handler"))
-      .then(rooms => rooms.length ? client.joinRoom(rooms[0].id) : client.createRoom("state_handler"))
+      .then(() => client.getRooms("mosx-state"))
+      .then(rooms => rooms.length ? client.joinRoom(rooms[0].id) : client.createRoom("mosx-state"))
       .then(r => {
         room = r
         console.log("joined")

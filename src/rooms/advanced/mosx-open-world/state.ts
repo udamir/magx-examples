@@ -12,6 +12,7 @@ export interface IRect {
   bottom: number
 }
 
+// set player objects as private - to manage player visibility
 @mx.Object.private
 export class OpenWorldPlayer {
   @mx public x: number
@@ -42,23 +43,31 @@ class Rect {
 
 @mx.Object
 export class OpenWorldState {
+  // room's rect in openworld
   @mx public rect: Rect
+  // room's players
   @mx public players = new Map<string, OpenWorldPlayer>()
 
   constructor(rect: IRect) {
     this.rect = new Rect(rect)
   }
 
+  // check if player in room rect
   public inRect(player: OpenWorldPlayer) {
     return player.x >= this.rect.left && player.x <= this.rect.right
       && player.y >= this.rect.top && player.y <= this.rect.bottom
   }
 
+  // create player
   public createPlayer(id: string, pos: IPoint, color: string) {
     const player = new OpenWorldPlayer(pos, color)
     this.players.set(id, player)
+    // make player trackable
     Mosx.setParent(player, this)
+
+    // check if player visible in room
     if (this.inRect(player)) {
+      // add tag to player
       Mosx.addTag(player, "visible")
     }
   }
@@ -70,12 +79,15 @@ export class OpenWorldState {
   public movePlayer(id: string, pos: IPoint) {
     const player = this.players.get(id)
     if (!player) { return }
+
+    // update player position
     player.x += pos.x ? pos.x * 10 : 0
     player.y += pos.y ? pos.y * 10 : 0
 
+    // check if player visible after move
     const tags = Mosx.getTags(player)
     const visible = tags && tags.has("visible")
-
+    // add or remove player visibility if needed
     if (!this.inRect(player)) {
       visible && Mosx.deleteTag(player, "visible")
     } else {

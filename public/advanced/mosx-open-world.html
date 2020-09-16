@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width" />
 
   <!-- magx client -->
-  <script type="text/javascript" src="/magx/dev"></script>
+  <script type="text/javascript" src="/magx"></script>
 
   <style>
     body {
@@ -36,6 +36,9 @@
   <p>This example shows how to split open world into rooms. Use arrows to move.</p>
 
   <script>
+    const { host, port, protocol } = window.document.location
+    var client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:" })
+
     let cells = {}
     const cellsize = 400
 
@@ -128,14 +131,11 @@
       }
     }
 
-    const { host, port, protocol } = window.document.location
-    var client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:" })
-
     const joinOpenWorldRoom = async (x, y, player) => {
       const cid = `${x}:${y}`
 
       // get open_world rooms list and find room with cid
-      const rooms = await client.getRooms("open_world")
+      const rooms = await client.getRooms("open-world")
       const link = rooms.find(({ data }) => data.id === cid)
       
       // join room
@@ -143,7 +143,7 @@
       const color = player && player.color
       const room = link 
         ? await client.joinRoom(link.id, { pos, color }) 
-        : await client.createRoom("open_world", { id: cid, size: cellsize, pos, color })
+        : await client.createRoom("open-world", { id: cid, size: cellsize, pos, color })
       // create cell object
       const cell = cells[cid] || createCell(x, y, room)
 
@@ -196,7 +196,7 @@
       await client.authenticate()
       
       // get rooms list
-      const rooms = await client.getRooms("open_world")
+      const rooms = await client.getRooms("open-world")
       
       // select random room
       const index = Math.floor(Math.random() * (rooms.length + 1))
