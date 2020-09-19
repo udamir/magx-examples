@@ -1,6 +1,6 @@
 {
   "name": "magx-examples",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Basic examples of how to use magx, mosx and magx-client",
   "main": "index.ts",
   "directories": {
@@ -15,8 +15,8 @@
   "author": "Damir Yusipov",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^11.15.20",
-    "magx": "^0.3.4",
+    "@types/node": "^11.15.27",
+    "magx": "^0.3.11",
     "magx-client": "^0.6.2",
     "mosx": "^0.7.1",
     "nodemon": "^1.19.4",

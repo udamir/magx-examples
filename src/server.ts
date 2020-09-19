@@ -1,12 +1,11 @@
 import * as http from "http"
 
-import { Server, IServerParams, LobbyRoom, Router } from "magx"
+import { Server, IServerParams, LobbyRoom, Router, RelayRoom } from "magx"
 
 // Import demo room handlers
 import {
   MosxChatRoom,
   ChatRoom,
-  RelayRoom,
   StateHandlerRoom,
   OpenWorldRoom,
   ReconnectionRoom,
