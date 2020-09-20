@@ -1,6 +1,7 @@
 import * as http from "http"
 
 import { Server, IServerParams, LobbyRoom, Router, RelayRoom } from "magx"
+import { monitor } from "magx-monitor"
 
 // Import demo room handlers
 import {
@@ -25,6 +26,8 @@ export const createServer = (params?: IServerParams<any>) => {
     .define("reconnection", ReconnectionRoom)
     .define("mosx-state", StateHandlerRoom)
     .define("open-world", OpenWorldRoom)
+
+  monitor(magx)
 
   // attach public dir routes
   magx.router.attach(Router.static(__dirname + "/../public"))

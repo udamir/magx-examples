@@ -18,6 +18,7 @@
     "@types/node": "^11.15.27",
     "magx": "^0.3.11",
     "magx-client": "^0.6.2",
+    "magx-monitor": "^0.0.2",
     "mosx": "^0.7.1",
     "nodemon": "^1.19.4",
     "ts-node": "^8.10.2",
