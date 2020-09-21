@@ -1,21 +1,20 @@
 import { Room, Client } from "magx"
 import { Mosx, mx } from "mosx"
 
+const colors = ["red", "green", "yellow", "blue", "cyan", "magenta"]
+
 @mx.Object
 export class Player {
-  @mx.number
-  public x = Math.floor(Math.random() * 400)
-
-  @mx.number
-  public y = Math.floor(Math.random() * 400)
+  @mx public x = Math.floor(Math.random() * 400)
+  @mx public y = Math.floor(Math.random() * 400)
+  @mx public color = colors[Math.floor(Math.random() * colors.length)]
 }
 
 @mx.Object
 export class State {
-  @mx.map(Player)
-  public players = new Map<string, Player>()
+  @mx public players = new Map<string, Player>()
 
-  public something = "This attribute won't be sent to the client-side"
+  public local = "This attribute won't be tracked"
 
   public createPlayer(id: string) {
     const player = new Player()
@@ -35,7 +34,7 @@ export class State {
   }
 }
 
-export class StateHandlerRoom extends Room<State> {
+export class MosxStateRoom extends Room<State> {
 
   public createState(): any {
     // create state
@@ -48,18 +47,18 @@ export class StateHandlerRoom extends Room<State> {
   }
 
   public onCreate(params: any) {
-    console.log("StateHandlerRoom created!", params)
+    console.log("MosxStateRoom created!", params)
   }
 
   public onMessage(client: Client, type: string, data: any) {
     if (type === "move") {
-      console.log("StateHandlerRoom received message from", client.id, ":", data)
+      console.log(`MosxStateRoom received message from ${client.id}`, data)
       this.state.movePlayer(client.id, data)
     }
   }
 
   public onJoin(client: Client, params: any) {
-    console.log(params)
+    console.log(`Player ${client.id} joined MosxStateRoom`, params)
     client.send("hello", "world")
     this.state.createPlayer(client.id)
   }
@@ -69,6 +68,6 @@ export class StateHandlerRoom extends Room<State> {
   }
 
   public onClose() {
-    console.log("StateHandlerRoom closed!")
+    console.log("MosxStateRoom closed!")
   }
 }

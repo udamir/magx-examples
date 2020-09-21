@@ -42,9 +42,9 @@
     let cells = {}
     const cellsize = 400
 
-    const movePlayer = (x, y) => {
+    const movePlayer = (dim, shift) => {
       Object.values(cells).forEach((cell) => {
-        cell.room.send("move", { x, y })
+        cell.room.send("move", { [dim]: shift })
       })
     }
 
@@ -198,7 +198,7 @@
       // get rooms list
       const rooms = await client.getRooms("open-world")
       
-      // select random room
+      // select random room to join
       const index = Math.floor(Math.random() * (rooms.length + 1))
       const room = rooms[index] || { data: { id: "0:0" } }
 
@@ -206,14 +206,18 @@
       await joinOpenWorldRoom(Number(x), Number(y))
     }
 
-    init()
+    try {
+      init()
+    } catch (error) {
+      console.log(error)
+    }
 
     window.addEventListener("keydown", ({ which }) => {
       switch (which) {
-        case 38: return movePlayer(0, -1)
-        case 39: return movePlayer(1, 0)
-        case 40: return movePlayer(0, 1)
-        case 37: return movePlayer(-1, 0)
+        case 38: return movePlayer("y", -1)
+        case 39: return movePlayer("x",  1)
+        case 40: return movePlayer("y",  1)
+        case 37: return movePlayer("x", -1)
       }
     })
   </script>

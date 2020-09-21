@@ -1,23 +1,20 @@
 {
   "name": "magx-examples",
-  "version": "0.1.2",
-  "description": "Basic examples of how to use magx, mosx and magx-client",
+  "version": "0.2.0",
+  "description": "Examples of how to use magx, mosx and magx-client",
   "main": "index.ts",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "start": "ts-node src/index.ts",
     "start-cluster": "ts-node src/cluster.ts",
     "serve": "nodemon --watch '**/*.ts' --ignore '**/*.spec.ts' --exec ts-node src/index.ts"
   },
-  "keywords": [],
+  "keywords": ["magx", "mosx", "examples"],
   "author": "Damir Yusipov",
   "license": "MIT",
   "dependencies": {
     "@types/node": "^11.15.27",
     "magx": "^0.3.11",
-    "magx-client": "^0.6.2",
+    "magx-client": "^0.6.3",
     "magx-monitor": "^0.0.2",
     "mosx": "^0.7.1",
     "nodemon": "^1.19.4",

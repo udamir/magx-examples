@@ -5,56 +5,36 @@
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <meta name="viewport" content="width=device-width" />
 
-  <!-- magx client -->
-  <script type="text/javascript" src="/magx"></script>
-
-  <style>
+  <style type="text/css">
     body {
       font-family: Tahoma, Geneva, sans-serif;
     }
-  </style>
-
-  <style type="text/css">
     .player {
       width: 100px;
       height: 100px;
       position: absolute;
       padding-top: 24px;
       box-sizing: border-box;
-      left: 0;
-      top: 0;
     }
   </style>
-
 </head>
 
 <body>
+  <p>This example shows how to use MosX state management in your room. Use arrows to move.</p>
 
-  <p>This example shows how to use custom data structures in your room's state.</p>
-
-  <strong>commands</strong><br>
-
-  <button onclick="move(0,-1)">up</button>
-  <button onclick="move(0, 1)">down</button>
-  <br />
-  <button onclick="move(-1, 0)">left</button>
-  <button onclick="move(1, 0)">right</button>
+  <!-- magx client -->
+  <script type="text/javascript" src="/magx"></script>
 
   <script>
     let room = null
     const players = {}
-    const colors = ['red', 'green', 'yellow', 'blue', 'cyan', 'magenta']
 
-    const move = (x, y) => {
-      room.send("move", { x, y })
-    }
-
-    const create = (id, player) => {
+    const addPlayer = (id, player) => {
       var el = document.createElement("div")
       el.className = "player"
       el.style.left = player.x + "px"
       el.style.top = player.y + "px"
-      el.style.background = colors[Math.floor(Math.random() * colors.length)]
+      el.style.background = player.color
       el.innerText = "Player " + id
 
       player.el = el
@@ -62,55 +42,67 @@
       document.body.appendChild(el);
     }
 
-    const remove = (id) => {
+    const removePlayer = (id) => {
       document.body.removeChild(players[id].el);
       delete players[id];
     }
 
-    const draw = (player) => {
+    const movePlayer = (dim, shift) => {
+      room.send("move", { [dim]: shift })
+    }
+
+    const updatePlayer = (id, prop, value) => {
+      const player = players[id];
+      player[prop] = value
       player.el.style.left = player.x + "px"
       player.el.style.top = player.y + "px"
+    }
+
+    const setState = (snapshot) => {
+      console.log("initial room state:", snapshot);
+      Object.keys(snapshot.players).forEach((id) => addPlayer(id, snapshot.players[id]))
     }
 
     const { host, port, protocol } = window.document.location
     var client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:" })
 
-    client.authenticate()
-      .then(() => client.getRooms("mosx-state"))
-      .then(rooms => rooms.length ? client.joinRoom(rooms[0].id) : client.createRoom("mosx-state"))
-      .then(r => {
-        room = r
-        console.log("joined")
+    const init = async() => {
+      // authenticate
+      await client.authenticate()
 
-        room.onSnapshot((state) => {
-          console.log("initial room state:", state);
-          Object.keys(state.players).forEach((id) => create(id, state.players[id]))
-        })
+      // get mosx-state rooms
+      const rooms = await client.getRooms("mosx-state")
 
-        room.onChange("add", "players/:id", ({ value: player }, { id }) => {
-          create(id, player)
-        })
+      // create or join room
+      room = rooms.length 
+        ? await client.joinRoom(rooms[0].id) // join existing room
+        : await client.createRoom("mosx-state") // create new room
+    
+      console.log("joined room")
 
-        room.onChange("remove", "players/:id", (patch, { id }) => {
-          remove(id)
-        })
+      // add state snapshot handler
+      room.onSnapshot((snapshot) => setState(snapshot))
 
-        room.onChange("replace", "players/:id/:prop", ({ value }, { id, prop }) => {
-          const player = players[id];
-          player[prop] = value
-          draw(player)
-        })
+      // add change handlers
+      room.onChange("add", "players/:id", (patch, { id }) => addPlayer(id, patch.value))
+      room.onChange("remove", "players/:id", (patch, { id }) => removePlayer(id))
+      room.onChange("replace", "players/:id/:prop", (patch, { id, prop }) => updatePlayer(id, prop, patch.value))
 
-        window.addEventListener("keydown", ({ which }) => {
-          switch (which) {
-            case 38: return move(0, -1)
-            case 39: return move(1, 0)
-            case 40: return move(0, 1)
-            case 37: return move(-1, 0)
-          }
-        })
+      window.addEventListener("keydown", ({ which }) => {
+        switch (which) {
+          case 38: return movePlayer("y", -1)
+          case 39: return movePlayer("x",  1)
+          case 40: return movePlayer("y",  1)
+          case 37: return movePlayer("x", -1)
+        }
       })
-      .catch(console.log)
+    }
+
+    try {
+      init()
+    } catch (error) {
+      console.log(error)
+    }
   </script>
 </body>
 

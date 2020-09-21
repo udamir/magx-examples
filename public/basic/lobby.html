@@ -8,16 +8,13 @@
       body { font-family: Tahoma, Geneva, sans-serif; }
     </style>
 
-    <!-- magx client -->
-    <script type="text/javascript" src="/magx"></script>
-
   </head>
   <body>
     <p>This example shows how to use <code>LobbyRoom</code>:</p>
     <ul>
         <li>When you join a lobby, you'll receive the current list of rooms</li>
         <li>Then, you'll receive updates when rooms are created, updated, or removed.</li>
-        <li>(All rooms on colyseus-examples have <code>.enableRealtimeListing()</code>, try joining other demos to see realtime updates here)</li>
+        <li>(All rooms on magx-examples are added to lobby watch list, try joining other demos to see realtime updates here)</li>
     </ul>
 
     <p>Open Developer Tools for log messages.</p>
@@ -30,6 +27,9 @@
     <h2>All rooms:</h2>
     <ul id="all_rooms"></ul>
 
+    <!-- magx client -->
+    <script type="text/javascript" src="/magx"></script>
+    
     <script>
       let allRooms = null
       let lobby = null
@@ -44,16 +44,18 @@
         })
 
         lobby.onMessage("room_update", ({ roomId, data }) => {
-          if (data === null) {
+          if (data === null) { // room removed
             console.log("Room removed", roomId)
-            allRooms = allRooms.filter((room) => room.roomId !== roomId)
+            const index = allRooms.findIndex(room => room.id === roomId)
+            if (index < 0) { return }
+            allRooms.splice(index, 1)
             update_full_list()
           } else {
             const roomIndex = allRooms.findIndex((room) => room.roomId === roomId)
-            if (roomIndex >= 0) {
+            if (roomIndex >= 0) { // room updated
               console.log("Room update:", data)
               allRooms[roomIndex] = data
-            } else {
+            } else { //room added
               console.log("New room", data)
               allRooms.push(data)
             }
@@ -70,10 +72,7 @@
 
       const update_full_list = () => {
         var el = document.getElementById('all_rooms')
-        el.innerHTML = allRooms.map(function(room) {
-            return "<li><code>" + JSON.stringify(room) + "</code></li>"
-        }).join("\n")
-
+        el.innerHTML = allRooms.map((room) => "<li><code>" + JSON.stringify(room) + "</code></li>").join("\n")
       }
 
       const leave = () => {
@@ -95,7 +94,7 @@
             lobby = room
             onJoin()
           }).catch(e => {
-              console.error("Error", e);
+            console.error("Error", e);
           })
       }
 

@@ -52,8 +52,8 @@ export class ChatUser extends Mosx {
 
 export class ChatState extends Mosx {
   // public properties
-  @mx.map(ChatUser) public users = new Map<string, ChatUser>()
-  @mx.array(ChatMessage) public messages = new Array<ChatMessage>()
+  @mx public users = new Map<string, ChatUser>()
+  @mx public messages = new Array<ChatMessage>()
 
   public publicTag: string = "public"
 
