@@ -62,8 +62,6 @@ export class OpenWorldState {
   public createPlayer(id: string, pos: IPoint, color: string) {
     const player = new OpenWorldPlayer(pos, color)
     this.players.set(id, player)
-    // make player trackable
-    Mosx.setParent(player, this)
 
     // check if player visible in room
     if (this.inRect(player)) {

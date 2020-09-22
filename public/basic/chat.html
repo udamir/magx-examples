@@ -7,10 +7,6 @@
     <style>
       body { font-family: Tahoma, Geneva, sans-serif; }
     </style>
-
-    <!-- magx client -->
-    <script type="text/javascript" src="/magx"></script>
-
   </head>
   <body>
     <p>This room doesn't use the room's state. It just broadcast messages through "broadcast" method.</p>
@@ -24,6 +20,9 @@
 
     <div id="messages"></div>
 
+    <!-- magx client -->
+    <script type="text/javascript" src="/magx"></script>
+    
     <script>
       const { host, port, protocol } = window.document.location
       var client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:" })
@@ -33,21 +32,22 @@
         .then(room => {
           console.log("joined")
 
+          // new room state
           room.onSnapshot((state) => {
             console.log("initial room state:", state);
           })
 
-          // new room state
+          // listen to patches coming from the server
           room.onPatch((patch) => {
             // this signal is triggered on each patch
             console.log("room state patch:", patch);
           })
-
-          // listen to patches coming from the server
+    
+          // listen to messages coming from the server
           room.onMessage("messages", (message) => {
-              var p = document.createElement("p");
-              p.innerText = message;
-              document.querySelector("#messages").appendChild(p);
+            var p = document.createElement("p");
+            p.innerText = message;
+            document.querySelector("#messages").appendChild(p);
           })
 
           // send message to room on submit
@@ -55,7 +55,6 @@
               e.preventDefault();
 
               var input = document.querySelector("#input");
-
               console.log("input:", input.value);
 
               // send data to room
@@ -65,7 +64,6 @@
               input.value = "";
            }
         })
-
     </script>
   </body>
 </html>

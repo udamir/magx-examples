@@ -19,7 +19,6 @@ export class State {
   public createPlayer(id: string) {
     const player = new Player()
     this.players.set(id, player)
-    Mosx.setParent(player, this)
   }
 
   public removePlayer(id: string) {
