@@ -1,12 +1,13 @@
 const { host, port, protocol } = window.document.location
 
+const serializer = MagX.SchemaSerializer
 const id = sessionStorage.getItem("sessionId")
 const token = sessionStorage.getItem("token")
 
 const chatStore = {
   state: { 
     username: "",
-    client: new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:", token, id }),
+    client: new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:", token, id, serializer }),
     room: null,
     typing: false,
     lastTypingTime: 0

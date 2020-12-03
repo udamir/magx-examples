@@ -1,5 +1,5 @@
 import { Room, Client } from "magx"
-import { Mosx } from "mosx"
+import { Mosx, SchemaSerializer } from "mosx"
 import { OpenWorldState, IPoint } from "./state"
 
 export class OpenWorldRoom extends Room<OpenWorldState> {
@@ -36,7 +36,7 @@ export class OpenWorldRoom extends Room<OpenWorldState> {
 
   public createPatchTracker(state: OpenWorldState) {
     // create state change tracker
-    return Mosx.createTracker(state)
+    return Mosx.createTracker(state, { serializer: SchemaSerializer })
   }
 
   public onCreate(params: { options: { id: string, size: number }}) {

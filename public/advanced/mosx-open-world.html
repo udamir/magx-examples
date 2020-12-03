@@ -37,7 +37,8 @@
 
   <script>
     const { host, port, protocol } = window.document.location
-    var client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:" })
+    const serializer = MagX.SchemaSerializer
+    const client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:", serializer })
 
     let cells = {}
     const cellsize = 400

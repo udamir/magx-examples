@@ -1,5 +1,5 @@
 import { Room, Client } from "magx"
-import { Mosx, mx } from "mosx"
+import { Mosx, mx, SchemaSerializer } from "mosx"
 
 const colors = ["red", "green", "yellow", "blue", "cyan", "magenta"]
 
@@ -42,7 +42,7 @@ export class MosxStateRoom extends Room<State> {
 
   public createPatchTracker(state: State) {
     // create state change tracker
-    return Mosx.createTracker(state)
+    return Mosx.createTracker(state, { serializer: SchemaSerializer })
   }
 
   public onCreate(params: any) {

@@ -1,5 +1,5 @@
 import { Room, Client } from "magx"
-import { Mosx } from "mosx"
+import { Mosx, SchemaSerializer } from "mosx"
 
 import { ChatState } from "./state"
 
@@ -12,7 +12,7 @@ export class MosxChatRoom extends Room<ChatState> {
 
   public createPatchTracker(state: ChatState) {
     // create state change tracker
-    return Mosx.createTracker(state)
+    return Mosx.createTracker(state, { serializer: SchemaSerializer })
   }
 
   public onJoin(client: Client) {
