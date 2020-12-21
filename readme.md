@@ -30,6 +30,8 @@ While running the server following examples are avaliable:
 
 ### Advanced examples
 
+[Snake game](http://localhost:3001/advanced/snake.html) - Example of simple game (snake)
+
 [Magx chat](http://localhost:3001/advanced/mosx-chat/index.html) - One room chat with private messages. This example shows how to create and manage private objects in Mosx state
 
 [Open world](http://localhost:3001/advanced/mosx-open-world.html) - This example shows how Magx and Mosx can be used for open world games.

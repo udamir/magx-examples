@@ -10,6 +10,7 @@ import {
   MosxStateRoom,
   OpenWorldRoom,
   ReconnectionRoom,
+  SnakeRoom,
 } from "./rooms"
 
 export const createServer = (params?: IServerParams<any>) => {
@@ -26,6 +27,7 @@ export const createServer = (params?: IServerParams<any>) => {
     .define("reconnection", ReconnectionRoom)
     .define("mosx-state", MosxStateRoom)
     .define("open-world", OpenWorldRoom)
+    .define("snake", SnakeRoom)
 
   monitor(magx)
 
