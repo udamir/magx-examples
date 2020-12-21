@@ -115,7 +115,6 @@ export class SnakeState {
     const x = Math.floor(Math.random() * this.gridSize)
     const y = Math.floor(Math.random() * this.gridSize)
 
-  
     for (const p of this.players.values()) {
       if (p.onSnake(x, y)) {
         return this.getEmptyCell()

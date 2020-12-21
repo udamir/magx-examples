@@ -3,13 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>MultiPlayer Snake</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-
-<style>
-#gameScreen {
-  display: none;
-}
-</style>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 </head>
 <body>
   <section class="vh-100">
@@ -17,33 +12,23 @@
 
       <div id="initialScreen" class="h-100">
         <div class="d-flex flex-column align-items-center justify-content-center h-100">
-            <h1>Multiplayer Snake</h1>
-            <button
-              type="submit"
-              class="btn btn-success"
-              id="newGameButton"
-            >
-              Create New Game
-            </button>
-            <div>OR</div>
-            <div class="form-group">
-              <input type="text" placeholder="Enter Game Code" id="gameCodeInput"/>
-            </div>
-            <button
-              type="submit"
-              class="btn btn-success"
-              id="joinGameButton"
-            >
-              Join Game
-            </button>
+          <h1>Multiplayer Snake</h1>
+          <button type="submit" class="btn btn-success" id="newGameButton">
+            Create New Game
+          </button>
+          <div>OR</div>
+          <div class="form-group">
+            <input type="text" placeholder="Enter Game Code" id="gameCodeInput" />
+          </div>
+          <button type="submit" class="btn btn-success" id="joinGameButton">
+            Join Game
+          </button>
         </div>
       </div>
 
-      <div id="gameScreen" class="h-100">
+      <div id="gameScreen" class="h-100" style="display: none;">
         <div class="d-flex flex-column align-items-center justify-content-center h-100">
-
           <h1>Your game code is: <span id="gameCodeDisplay"></span></h1>
-
           <canvas id="canvas"></canvas>
         </div>
       </div>
@@ -53,78 +38,59 @@
 
   <script type="text/javascript" src="/magx"></script>
   <script>
-    const BG_COLOUR = '#231f20';
-    const SNAKE_COLOUR = '#c2c2c2';
-    const FOOD_COLOUR = '#e66916';
+    const BG_COLOUR = '#231f20'
+    const SNAKE_COLOUR = '#c2c2c2'
+    const FOOD_COLOUR = '#e66916'
 
-    let state = {}
-    let room = null
+    const gameScreen = document.getElementById('gameScreen')
+    const initialScreen = document.getElementById('initialScreen')
+    const newGameBtn = document.getElementById('newGameButton')
+    const joinGameBtn = document.getElementById('joinGameButton')
+    const gameCodeInput = document.getElementById('gameCodeInput')
+    const gameCodeDisplay = document.getElementById('gameCodeDisplay')
 
-    let gameActive = false;
+    const canvas = document.getElementById('canvas')
+    canvas.width = canvas.height = 600
+    const ctx = canvas.getContext('2d')
+    
+    const { host, port, protocol } = window.document.location
+    const serializer = MagX.SchemaSerializer
+    const client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:", serializer })
 
-    const gameScreen = document.getElementById('gameScreen');
-    const initialScreen = document.getElementById('initialScreen');
-    const newGameBtn = document.getElementById('newGameButton');
-    const joinGameBtn = document.getElementById('joinGameButton');
-    const gameCodeInput = document.getElementById('gameCodeInput');
-    const gameCodeDisplay = document.getElementById('gameCodeDisplay');
-
-    function paintPlayer(id, size, color) {
-      const snake = state.players[id].snake;
-
-      ctx.fillStyle = color;
-      for (let cell of snake) {
-        ctx.fillRect(cell.x * size, cell.y * size, size, size);
-      }
-    }
-
-    function paintGame() {
+    const paintGame = (state) => {
       ctx.fillStyle = BG_COLOUR;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const gridsize = state.gridSize;
       const size = canvas.width / gridsize;
-
+      // paint food
       for (const f of state.food) {
-        ctx.fillStyle = FOOD_COLOUR;
-        ctx.fillRect(f.x * size, f.y * size, size, size);
+        ctx.fillStyle = FOOD_COLOUR
+        ctx.fillRect(f.x * size, f.y * size, size, size)
       }
-
+      // paint players
       Object.keys(state.players).forEach(id => {
         const color = id === client.auth.id ? SNAKE_COLOUR : "red"
-        paintPlayer(id, size, color);
+        const snake = state.players[id].snake
+        ctx.fillStyle = color
+        for (let cell of snake) {
+          ctx.fillRect(cell.x * size, cell.y * size, size, size)
+        }
       })
     }
 
-    function gameOver(looser) {
-      if (!gameActive || !looser) {
-        return;
-      }
-      gameActive = false;
+    const initRoom = (room) => {
+      let state = {}
 
-      if (looser === client.auth.id) {
-        alert('You Lose :(');
-      } else {
-        alert('You Win!');
-      }
-    }
-
-    const { host, port, protocol } = window.document.location
-    const serializer = MagX.SchemaSerializer
-    const client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:", serializer })
-
-    const initRoom = () => {
-      console.log("joined room")
-      gameCodeDisplay.innerText = room.id;
-      
       // add state snapshot handler
       room.onSnapshot((snapshot) => {
         state = snapshot
-        paintGame()
+        paintGame(state)
       })
 
       room.onPatch(() => {
-        requestAnimationFrame(() => paintGame())
+        // paint game on state change
+        requestAnimationFrame(() => paintGame(state))
       })
 
       // add change handlers
@@ -137,15 +103,18 @@
       room.onChange("add", "players/:id/snake/:index", (patch, { id, index }) => state.players[id].snake[index] = patch.value)
       room.onChange("remove", "players/:id/snake/:index", (patch, { id, index }) => state.players[id].snake.splice(index, 1))
 
-      room.onChange("replace", "looser", (patch) => gameOver(patch.value))
+      room.onChange("replace", "looser", ({ value }) => {
+        alert(value === client.auth.id ? 'You Lose :(' : 'You Win!')
+        initialScreen.style.display = "block"
+        gameScreen.style.display = "none"
+        room.leave()
+      })
 
-      initialScreen.style.display = "none";
-      gameScreen.style.display = "block";
+      // draw game screen
+      gameCodeDisplay.innerText = room.id;
 
-      canvas = document.getElementById('canvas');
-      ctx = canvas.getContext('2d');
-
-      canvas.width = canvas.height = 600;
+      initialScreen.style.display = "none"
+      gameScreen.style.display = "block"
 
       ctx.fillStyle = BG_COLOUR;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -158,23 +127,19 @@
           case 40: return room.send("keypress", 3) // DOWN
         }
       })
-      gameActive = true;
     }
 
-    const newGame = async () => {
-      room = await client.createRoom("snake") // create new room
-      initRoom()
-    }
+    newGameBtn.addEventListener('click', async () => {
+      const room = await client.createRoom("snake") // create new room
+      initRoom(room)
+    })
 
-    const joinGame = async() => {
-      const roomId = gameCodeInput.value;
-      room = await client.joinRoom(roomId) // join existing room
+    joinGameBtn.addEventListener('click', async () => {
+      const roomId = gameCodeInput.value
+      const room = await client.joinRoom(roomId) // join existing room
       if (!room) { return }
-      initRoom()
-    }
-
-    newGameBtn.addEventListener('click', newGame);
-    joinGameBtn.addEventListener('click', joinGame);
+      initRoom(room)
+    })
 
     try {
       client.authenticate()
@@ -183,4 +148,5 @@
     }
   </script>
 </body>
+
 </html>
