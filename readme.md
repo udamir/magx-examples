@@ -45,5 +45,10 @@ Examples project can be run in cluster mode:
 npm run cluster
 ```
 
+or via pm2 (redis and mongodb required):
+```
+npm run pm2
+```
+
 ## License
 MIT
