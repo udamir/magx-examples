@@ -20,7 +20,7 @@ export class MosxChatRoom extends Room<ChatState> {
     const user = this.state.addUser(client.id, { name: client.data.username })
 
     // update tags for client
-    this.updateTrackingParams(client, { tags: [user.privateTag, this.state.publicTag ] })
+    this.updateTrackingParams(client, { tags: [ user.privateTag, this.state.publicTag ] })
   }
 
   public onMessage(client: Client, type: string, data: any) {
@@ -37,7 +37,12 @@ export class MosxChatRoom extends Room<ChatState> {
     const user = this.state.users.get(client.id)
     if (!user) { return }
     // send message from user
-    user.sendMessage(data.message, data.to)
+    if (data.to && data.to.length) {
+      this.state.addPrivateMessage(user, data.message, data.to)
+    } else {
+      this.state.addPublicMessage(user, data.message)
+    }
+    user.incMessages()
   }
 
   public setClientTyping(id: string, typing: boolean) {

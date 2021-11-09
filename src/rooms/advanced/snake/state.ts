@@ -1,9 +1,9 @@
 import { mx } from "mosx"
 
 @mx.Object
-export class Point{
+export class Point {
   @mx public x!: number
-  @mx public y!: number  
+  @mx public y!: number
 
   constructor(x: number, y: number) {
     this.set(x, y)
@@ -20,12 +20,12 @@ export class SnakePlayer {
   public x: number
   public y: number
   public vel: Point
-  @mx public snake: Array<Point> 
+  @mx public snake: Array<Point>
 
   constructor(x: number, y: number) {
     this.x = x
     this.y = y
-    this.vel = new Point(0,0)
+    this.vel = new Point(0, 0)
     this.snake = [new Point(x, y)]
   }
 
@@ -43,7 +43,7 @@ export class SnakePlayer {
   }
 
   public onSnake(x: number, y: number) {
-    for(const s of this.snake) {
+    for (const s of this.snake) {
       if (s.x === x && s.y === y) { return true }
     }
     return false
@@ -81,7 +81,7 @@ export class SnakeState {
       if (p.vel.x || p.vel.y) {
         p.x += p.vel.x
         p.y += p.vel.y
-        
+
         for (const pp of this.players.values()) {
           if (pp.onSnake(p.x, p.y)) { return id }
         }
@@ -92,7 +92,6 @@ export class SnakeState {
           return id
         }
 
-
         let grow = false
         this.food.forEach((f, i) => {
           if (p.x === f.x && p.y === f.y) {
@@ -101,13 +100,13 @@ export class SnakeState {
             if (!this.food.length) { this.addFood() }
           }
         })
-        
+
         if (!grow) {
           p.snake.shift()
         }
       }
     }
-  
+
     return ""
   }
 
@@ -126,7 +125,7 @@ export class SnakeState {
 
   public addFood(): void {
     const [x, y] = this.getEmptyCell()
-  
+
     this.food.push(new Point(x, y))
   }
 }

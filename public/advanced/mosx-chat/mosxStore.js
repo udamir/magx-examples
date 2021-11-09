@@ -29,7 +29,7 @@ const mosxStore = {
       if (Array.isArray(obj) && +key) {
         obj.splice(+key, 1)
       } else {
-        Vue.remove(obj, key)
+        Vue.delete(obj, key)
       }
     }
   },

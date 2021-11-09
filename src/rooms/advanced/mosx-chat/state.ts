@@ -1,56 +1,48 @@
 import { Mosx, mx } from "mosx"
 
 @mx.Object.private // private object
-export class ChatMessage extends Mosx {
+export class ChatMessage {
   // public properties
-  @mx public id: string
+  @mx public id: string = Math.random().toString(36).substr(2)
+  @mx public date: number = Date.now()
   @mx public userId: string
   @mx public text: string
-  @mx public date: number
 
-  constructor(owner: Mosx, { userId, text }: any) {
-    super(owner)
-    this.id = Math.random().toString(36).substr(2)
+  constructor(userId: string, text: string) {
     this.userId = userId
     this.text = text
-    this.date = Date.now()
   }
 }
 
-export class ChatUser extends Mosx {
+@mx.Object
+export class ChatUser {
   // public properties
   @mx public id: string
   @mx public name: string
-  @mx public typing: boolean
-  @mx public online: boolean
+  @mx public typing: boolean = false
+  @mx public online: boolean = true
   // private property
-  @mx.private public messages: number
+  @mx.private public messages: number = 0
 
   public privateTag: string
 
-  constructor(owner: Mosx, { id, name }: any) {
-    super(owner)
+  constructor(id: string, name: string, tag: string) {
     this.id = id
     this.name = name
-    this.typing = false
-    this.online = true
-    this.messages = 0
-    this.privateTag = Math.random().toString(36).slice(3)
-    Mosx.addTag(this, this.privateTag)
+    this.privateTag = tag
   }
 
   public setTyping(value: boolean) {
     this.typing = value
   }
 
-  public sendMessage(text: string, to?: string[]) {
-    const state = Mosx.getParent(this) as ChatState
-    state.addMessage(this, text, to)
+  public incMessages() {
     this.messages++
   }
 }
 
-export class ChatState extends Mosx {
+@mx.Object
+export class ChatState {
   // public properties
   @mx public users = new Map<string, ChatUser>()
   @mx public messages = new Array<ChatMessage>()
@@ -58,7 +50,12 @@ export class ChatState extends Mosx {
   public publicTag: string = "public"
 
   public addUser(id: string, data: any) {
-    const user = new ChatUser(this, { id, ...data })
+    const tag = Math.random().toString(36).slice(3)
+    // create user
+    const user = new ChatUser(id, data.name, tag)
+    // add tag to user
+    Mosx.addTag(user, tag)
+    
     this.users.set(id, user)
     return user
   }
@@ -67,21 +64,29 @@ export class ChatState extends Mosx {
     this.users.delete(sessionId)
   }
 
-  public addMessage(from: ChatUser, text: string, to?: string[]) {
-    const message = new ChatMessage(from, { userId: from.id, text })
-    if (to && to.length) {
-      to.forEach((userId) => {
-        const user = this.users.get(userId)
-        if (user) {
-          // add client's tag to message
-          Mosx.addTag(message, user.privateTag)
-        }
-      })
-    } else {
-      // add public tag to message
-      Mosx.addTag(message, this.publicTag)
-    }
+  public addPublicMessage(from: ChatUser, text: string) {
+    // create message with public tag and owner tags (inherit from parent)
+    const message = new ChatMessage(from.id, text)
+    // add public tag to message
+    Mosx.addTag(message, this.publicTag)
+
     // push will trigger patches for all
+    this.messages.push(message)
+  }
+
+  public addPrivateMessage(from: ChatUser, text: string, to: string[]) {
+    // create message
+    const message = new ChatMessage(from.id, text)
+    // add owner tags to message
+    Mosx.setParent(message, from)
+
+    // add client's tag to message
+    to.forEach((userId) => {
+      const user = this.users.get(userId)
+      user && Mosx.addTag(message, user.privateTag)
+    })
+
+    // push will trigger patches for users in list "to"
     this.messages.push(message)
   }
 }

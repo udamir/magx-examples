@@ -3,11 +3,11 @@ const { host, port, protocol } = window.document.location
 const serializer = MagX.SchemaSerializer
 const id = sessionStorage.getItem("sessionId")
 const token = sessionStorage.getItem("token")
+const client = new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:", token, id, serializer })
 
 const chatStore = {
   state: { 
     username: "",
-    client: new MagX.Client({ address: host.replace(/:.*/, ''), port, secure: protocol === "https:", token, id, serializer }),
     room: null,
     typing: false,
     lastTypingTime: 0
@@ -15,7 +15,7 @@ const chatStore = {
   getters: { 
     username: ({ username }) => username,
     room: ({ room }) => room,
-    id: ({ client }) => client && client.auth && client.auth.id || ""
+    id: () => client && client.auth && client.auth.id || ""
   },
   mutations: {
     setUserName(state, name) { 
@@ -36,7 +36,7 @@ const chatStore = {
       try {
         const roomId = sessionStorage.getItem("roomId")
         const username = sessionStorage.getItem("username")
-        const room = await state.client.reconnect(roomId)
+        const room = await client.reconnect(roomId)
         console.log("Reconnected")
         commit("setUserName", username)
         dispatch("handleRoom", room)
@@ -49,23 +49,23 @@ const chatStore = {
         commit("setUserName", "")
       }
     },
-    async auth({ commit, state }, data) {
+    async auth({ commit }, data) {
       console.log("Auth", data)
-      const session = await state.client.authenticate(data)
+      const session = await client.authenticate(data)
       console.log("Session", data, session)
       commit("setUserName", session.data.username)
       sessionStorage.setItem("sessionId", session.id)
       sessionStorage.setItem("token", session.token)
       sessionStorage.setItem("username", session.data.username)
     },
-    async joinChat({ state, dispatch }) {
+    async joinChat({ dispatch }) {
 
-      const rooms = await state.client.getRooms("mosx-chat")
+      const rooms = await client.getRooms("mosx-chat")
 
       console.log("Avaliable rooms:", rooms)
       room = rooms.length 
-        ? await state.client.joinRoom(rooms[0].id) 
-        : await state.client.createRoom("mosx-chat")
+        ? await client.joinRoom(rooms[0].id) 
+        : await client.createRoom("mosx-chat")
     
       if (room) {
         dispatch("handleRoom", room)
