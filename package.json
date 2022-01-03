@@ -1,6 +1,7 @@
 {
   "name": "magx-examples",
-  "version": "0.2.4",
+  "private": true,
+  "version": "0.2.5",
   "description": "Examples of how to use magx, mosx and magx-client",
   "main": "index.ts",
   "scripts": {
@@ -17,19 +18,19 @@
   "author": "Damir Yusipov",
   "license": "MIT",
   "dependencies": {
-    "ioredis": "^4.28.0",
-    "magx": "^0.5.7",
+    "ioredis": "^4.28.2",
+    "magx": "^0.5.13",
     "magx-client": "^0.7.2",
     "magx-monitor": "0.0.7",
-    "mongodb": "^4.1.4",
-    "mosx": "^0.8.10"
+    "mongodb": "^4.2.2",
+    "mosx": "^0.8.11"
   },
   "devDependencies": {
-    "@types/ioredis": "^4.28.1",
-    "@types/node": "^11.15.54",
-    "nodemon": "^1.19.4",
-    "ts-node": "^8.10.2",
-    "tslint": "^5.20.1",
-    "typescript": "^4.4.4"
+    "@types/ioredis": "^4.28.6",
+    "@types/node": "^17.0.7",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.4.0",
+    "tslint": "^6.1.3",
+    "typescript": "^4.5.4"
   }
 }
